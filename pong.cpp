@@ -13,16 +13,18 @@ const std::string TITLE = "Pong";
 std::vector<SDL_Texture*> tex_tracker;
 
 // some objects 
-struct ball {
-	int r;
-	int g;
-	int b;
-};
+typedef struct pong{
+	SDL_Rect ball;
+	int x_velocity;
+	int y_velocity;	
 
-struct e_paddle { // enemy paddle;
-	float y;
-	float vy;
-};
+}pong;
+
+typedef struct e_paddle { // enemy paddle;
+	SDL_Rect paddle;
+	int x_velocity;
+	int y_velocity;	
+}e_paddle;
 // clock for delta time
 struct game_clock{
 	u_int32_t last_time = 0;
@@ -39,6 +41,7 @@ struct game_clock{
 bool init(SDL_Window**, SDL_Renderer**);
 void clean(SDL_Renderer** , SDL_Window** );
 void err(const char *func_name, const unsigned line_num);
+void handle_collide(pong ball, const e_paddle &player, const e_paddle &enemy);
 SDL_Texture* loadTexture(const std::string &path, SDL_Renderer* renderer);
 
 int main(int argc, char *args[]){
@@ -54,18 +57,21 @@ int main(int argc, char *args[]){
 
 		SDL_Event e;
 
-		SDL_Rect paddle;
-		paddle.x = SCREEN_WIDTH / 4;
-		paddle.y = y;
-		paddle.h = 200;
-		paddle.w = 25;
 
 		struct game_clock c;
+		pong p;
+		p.ball.x = ( SCREEN_WIDTH / 2 );
+		p.ball.y = y;
+		p.ball.h = 16;
+		p.ball.w = 16;
 
-		SDL_Rect ball_rect;
-		ball_rect.w = 8 * 2;
-		ball_rect.h = 8 * 2;
-		ball_rect.x = SCREEN_WIDTH / 2;
+		e_paddle player_paddle;
+		player_paddle.paddle.x = 0;
+		player_paddle.paddle.w = 25;
+		player_paddle.paddle.h = 100;
+		player_paddle.paddle.y = y;
+
+
 
 		while(!quit){
 			c.tick();	
@@ -80,15 +86,18 @@ int main(int argc, char *args[]){
 				}
 
 			} 
-			ball_rect.x +=  .1  * (c.delta_time);
-			ball_rect.y = y;
+			p.ball.x += .1 *( c.delta_time);	
+			player_paddle.paddle.y = y;
+
+			check_collide(&p, player_paddle);
 
 			std::cout << "delta time" << " "  << c.delta_time / 1000 << std::endl;	
 
 			SDL_SetRenderDrawColor(gRenderer , 0x00 , 0x00, 0x00, 0xFF);
 			SDL_RenderClear(gRenderer);	
 			SDL_SetRenderDrawColor(gRenderer , 0xFF , 0xFF, 0xFF, 0xFF);
-			SDL_RenderFillRect(gRenderer, &ball_rect);
+			SDL_RenderFillRect(gRenderer, &p.ball);
+			SDL_RenderFillRect(gRenderer, &player_paddle.paddle);
 			SDL_RenderPresent( gRenderer );
 			
 			SDL_Delay(1000 / 60);
@@ -147,6 +156,19 @@ SDL_Texture* loadTexture(const std::string &path, SDL_Renderer *renderer){
 	tex_tracker.push_back(result_texture);
 	return result_texture;
 }
+
+void handle_collide(pong ball, const e_paddle &player, const e_paddle &enemy){
+	
+// handle collision	
+
+
+
+
+
+
+
+}
+
 void clean(SDL_Renderer**  gRenderer , SDL_Window** gWindow ){
 	for(auto &a: tex_tracker){
 		SDL_DestroyTexture(a);
