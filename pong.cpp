@@ -14,26 +14,31 @@ std::vector<SDL_Texture*> tex_tracker;
 
 // some objects 
 struct ball {
-	float x;
-	float y;
-	float vx;
-	float vy;
-	
+	int r;
+	int g;
+	int b;
 };
 
 struct e_paddle { // enemy paddle;
 	float y;
 	float vy;
 };
-
+// clock for delta time
 struct game_clock{
-		
-};
+	u_int32_t last_time = 0;
+	float delta_time = 0;
+	
+	void tick(){
+		uint32_t tick_time = SDL_GetTicks();
+		delta_time = tick_time - last_time;
+		last_time = tick_time;
+	}
+}; 
+
 // methods 
 bool init(SDL_Window**, SDL_Renderer**);
 void clean(SDL_Renderer** , SDL_Window** );
 void err(const char *func_name, const unsigned line_num);
-
 SDL_Texture* loadTexture(const std::string &path, SDL_Renderer* renderer);
 
 int main(int argc, char *args[]){
@@ -46,10 +51,7 @@ int main(int argc, char *args[]){
 	} else {
 		int x,y = 0;
 		bool quit = false;
-		
-		float last_time = 0;
-		float delta_time = 0;
-		
+
 		SDL_Event e;
 
 		SDL_Rect paddle;
@@ -58,19 +60,16 @@ int main(int argc, char *args[]){
 		paddle.h = 200;
 		paddle.w = 25;
 
+		struct game_clock c;
+
+		SDL_Rect ball_rect;
+		ball_rect.w = 8 * 2;
+		ball_rect.h = 8 * 2;
+		ball_rect.x = SCREEN_WIDTH / 2;
+
 		while(!quit){
+			c.tick();	
 			
-			float current_time = SDL_GetTicks() / 1000;
-			// if statement just to make sure the time passed is greater than last_Time ( otherwise delta would be negative);
-			if(current_time > last_time){
-			// delta time how much time passed since last_frame update
-			   delta_time = (current_time - last_time); 
-			   last_time  = current_time;
-			}
-
-			// std::cout << "delta time" << "  " << delta_time<< std::endl;
-
-
 			while(SDL_PollEvent(&e) != 0){
 				if(e.type == SDL_QUIT){
 					quit = true;
@@ -81,22 +80,18 @@ int main(int argc, char *args[]){
 				}
 
 			} 
+			ball_rect.x +=  .1  * (c.delta_time);
+			ball_rect.y = y;
 
-			
-			paddle.x += 1 * (delta_time / 100);
-			paddle.y = y;
+			std::cout << "delta time" << " "  << c.delta_time / 1000 << std::endl;	
 
-			SDL_Texture *mario_tex = loadTexture("mario.png", gRenderer);
-		// 	SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
-		//	SDL_RenderClear( gRenderer );
-		//	//Render red filled quad
-		//	SDL_Rect fillRect = { SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
-		//	SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0xFF );		
-		//	SDL_RenderFillRect( gRenderer, &paddle);
+			SDL_SetRenderDrawColor(gRenderer , 0x00 , 0x00, 0x00, 0xFF);
 			SDL_RenderClear(gRenderer);	
-			SDL_RenderCopy(gRenderer, mario_tex,nullptr,nullptr);
+			SDL_SetRenderDrawColor(gRenderer , 0xFF , 0xFF, 0xFF, 0xFF);
+			SDL_RenderFillRect(gRenderer, &ball_rect);
 			SDL_RenderPresent( gRenderer );
-
+			
+			SDL_Delay(1000 / 60);
 		}
 
 		clean(&gRenderer, &gWindow);
@@ -123,7 +118,8 @@ bool init(SDL_Window **gWindow, SDL_Renderer **gRenderer){
 				success = false;
 			} else {
 
-				SDL_SetRenderDrawColor(*gRenderer, 0xFF,0xFF,0xFF,0xFF);
+				SDL_SetRenderDrawColor(*gRenderer, 0x00,0x00,0x00,0x00);
+
 				int imgflags = IMG_INIT_PNG;
 				if(!(IMG_Init(imgflags) & imgflags)){
 					err(__func__,__LINE__);
@@ -151,12 +147,12 @@ SDL_Texture* loadTexture(const std::string &path, SDL_Renderer *renderer){
 	tex_tracker.push_back(result_texture);
 	return result_texture;
 }
-
 void clean(SDL_Renderer**  gRenderer , SDL_Window** gWindow ){
 	for(auto &a: tex_tracker){
 		SDL_DestroyTexture(a);
 		a = nullptr;
 	}
+	std::cout << "freed " << tex_tracker.size() <<  "  elements " << std::endl;
 	//Destroy window	
 	SDL_DestroyRenderer( *gRenderer );
 	SDL_DestroyWindow( *gWindow );
