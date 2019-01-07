@@ -24,7 +24,7 @@ typedef struct e_paddle { // enemy paddle;
 	SDL_Rect paddle;
 	int x_velocity;
 	int y_velocity;	
-}e_paddle;
+}e_paddle, p_paddle
 // clock for delta time
 struct game_clock{
 	u_int32_t last_time = 0;
@@ -36,14 +36,14 @@ struct game_clock{
 		last_time = tick_time;
 	}
 }; 
-
+#define loop(i,i) for(int i = i; i < i; i++){ #ifdef std 
+	
 // methods 
 bool init(SDL_Window**, SDL_Renderer**);
 void clean(SDL_Renderer** , SDL_Window** );
 void err(const char *func_name, const unsigned line_num);
 void handle_collide(pong ball, const e_paddle &player, const e_paddle &enemy);
 SDL_Texture* loadTexture(const std::string &path, SDL_Renderer* renderer);
-
 int main(int argc, char *args[]){
 	SDL_Window *gWindow;
 	SDL_Renderer *gRenderer;
@@ -65,12 +65,17 @@ int main(int argc, char *args[]){
 		p.ball.h = 16;
 		p.ball.w = 16;
 
-		e_paddle player_paddle;
+		p_paddle player_paddle;
 		player_paddle.paddle.x = 0;
 		player_paddle.paddle.w = 25;
 		player_paddle.paddle.h = 100;
 		player_paddle.paddle.y = y;
-
+	
+		e_paddle enemy_paddle;
+		enemy_paddle.paddle.x = 0;
+		enemy_paddle.paddle.w = 25;
+		enemy_paddle.paddle.h = 100;
+		enemy_paddle.paddle.y = y;
 
 
 		while(!quit){
@@ -89,7 +94,7 @@ int main(int argc, char *args[]){
 			p.ball.x += .1 *( c.delta_time);	
 			player_paddle.paddle.y = y;
 
-			check_collide(&p, player_paddle);
+			handle_collide(&p, player_paddle, enemy_paddle);
 
 			std::cout << "delta time" << " "  << c.delta_time / 1000 << std::endl;	
 
@@ -157,10 +162,10 @@ SDL_Texture* loadTexture(const std::string &path, SDL_Renderer *renderer){
 	return result_texture;
 }
 
-void handle_collide(pong ball, const e_paddle &player, const e_paddle &enemy){
+void handle_collide(pong &ball, const e_paddle &player, const e_paddle &enemy){
 	
-// handle collision	
-
+	// axis	
+	   
 
 
 
