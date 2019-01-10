@@ -22,6 +22,11 @@ typedef struct pong{
 		ball.x += x_vel * dt;
 		ball.y += y_vel * dt;
 	}
+	/*
+	 * First calculate how far the ball is from the center ( rel_intersect )
+	 * then normalize that value ( make it between -1 and 1 ) so that we can scale our angle between -1 and 1. If it was not normalized than our bounce_angle when
+	 * multiplied by 75 becomes really large  for example ( norm_intersect is 5  * 75 ) 
+	 */ 
 	void handle_collision(float dt, const paddle &player, const paddle &opponent);	
 
 }pong;
@@ -39,3 +44,4 @@ struct game_clock{
 }; 
 
 inline float calc(const paddle &p,  int y_collide);
+inline float calc_win(const float &ball_pos, const bool isDown);

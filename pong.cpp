@@ -9,15 +9,15 @@ const int SCREEN_HEIGHT = 480;
 const std::string TITLE = "Pong";
 
 // keep track of all texture and free at end
-
 std::vector<SDL_Texture*> tex_tracker;
 
-	
+
 // methods 
 bool init(SDL_Window**, SDL_Renderer**);
 void clean(SDL_Renderer** , SDL_Window** );
 void err(const char *func_name, const unsigned line_num);
 void handle_collide(pong ball, const e_paddle &player, const e_paddle &enemy);
+
 SDL_Texture* loadTexture(const std::string &path, SDL_Renderer* renderer);
 
 int main(int argc, char *args[]){
@@ -34,9 +34,9 @@ int main(int argc, char *args[]){
 		SDL_Event e;
 
 		struct game_clock c;
-		pong p(.1,0);
+		pong p(.1,.1);
 		p.ball.x = ( SCREEN_WIDTH / 2 );
-		p.ball.y = y;
+		p.ball.y = ( SCREEN_HEIGHT / 2 );
 		p.ball.h = 16;
 		p.ball.w = 16;
 
@@ -45,7 +45,7 @@ int main(int argc, char *args[]){
 		player_paddle.paddle.w = 25;
 		player_paddle.paddle.h = 100;
 		player_paddle.paddle.y = y;
-	
+
 		e_paddle enemy_paddle;
 		enemy_paddle.paddle.x = SCREEN_WIDTH - 25;
 		enemy_paddle.paddle.w = 25;
@@ -55,7 +55,7 @@ int main(int argc, char *args[]){
 
 		while(!quit){
 			c.tick();	
-			
+
 			while(SDL_PollEvent(&e) != 0){
 				if(e.type == SDL_QUIT){
 					quit = true;
@@ -68,7 +68,7 @@ int main(int argc, char *args[]){
 			} 
 
 			player_paddle.paddle.y = y;
-			enemy_paddle.paddle.y = p.ball.y;
+			enemy_paddle.paddle.y = y;
 
 			p.update_movement(c.delta_time, p.x_vel, p.y_vel);
 			p.handle_collision(c.delta_time, player_paddle, enemy_paddle);
@@ -83,7 +83,7 @@ int main(int argc, char *args[]){
 			SDL_RenderFillRect(gRenderer, &player_paddle.paddle);
 			SDL_RenderFillRect(gRenderer, &enemy_paddle.paddle);
 			SDL_RenderPresent( gRenderer );
-			
+
 			SDL_Delay(1000 / 60);
 		}
 
@@ -93,7 +93,7 @@ int main(int argc, char *args[]){
 }
 
 bool init(SDL_Window **gWindow, SDL_Renderer **gRenderer){
-	
+
 	bool success = true;
 	if(SDL_Init(SDL_INIT_VIDEO) < 0){
 		err(__func__,__LINE__);
@@ -142,35 +142,51 @@ SDL_Texture* loadTexture(const std::string &path, SDL_Renderer *renderer){
 }
 
 void pong::handle_collision(float dt, const paddle &player, const paddle &opponent){
-	 if(ball.y >= player.paddle.y && ball.y <= player.paddle.y + player.paddle.h){
-		if(ball.x  == player.paddle.x){
-			std::cout << "COLLIDE";
-			const auto bounce_angle = calc(player, ball.y);
-			std::cout << bounce_angle << "  " << std::endl;
-			x_vel += (.01 * cos(bounce_angle)) * dt;
-			y_vel += (.01 * sin(bounce_angle)) * dt;
+	// handle window collision
+	if(ball.x < 0 || (ball.x + ball.w) > SCREEN_WIDTH){
+		x_vel *= -1;
+	}
 
-		}	
-	 }
-	 if(ball.y >= opponent.paddle.y && ball.y <= opponent.paddle.y + opponent.paddle.h){
-		if(ball.x + ball.w == opponent.paddle.x){
-			/*
-			 * First calculate how far the ball is from the center ( rel_intersect )
-			 * then normalize that value ( make it between -1 and 1 ) so that we can scale our angle between -1 and 1. If it was not normalized than our bounce_angle when
-			 * multiplied by 75 becomes really large  for example ( norm_intersect is 5  * 75 ) 
-			 */ 
-			float bounce_angle = calc(opponent,ball.y);
-			std::cout << bounce_angle << "  " << std::endl;
+ 	if(ball.y <= 0){
+ 		std::cout << "TOUCHED TOP" << std::endl;
+ 		float angle = calc_win(ball.x, false);
+ 		y_vel *= -1;
+ 	} else if(ball.y + ball.h >= SCREEN_HEIGHT){
+ 		std::cout << "TOUCHED BOTTOM" << std::endl;
+ 		float angle = calc_win(ball.x, true);
+ 		y_vel *= -1;
+		y_vel *= cos(angle);
+ 		//y_vel += (.01 * sin(bounce_angle)) * dt;
+ 		
+ 	}
 
-			x_vel += -1 * (.01 * cos(bounce_angle)) * dt;
-			y_vel += (.01 * sin(bounce_angle)) * dt;
-			
-		}	
-	 }
-
-
+// 	if(ball.y >= player.paddle.y && ball.y <= player.paddle.y + player.paddle.h){
+// 		if(ball.x == player.paddle.x + player.paddle.w){
+// 			std::cout << "player paddle collision" << std::endl;
+// 			const auto bounce_angle = calc(player, ball.y);
+// 			std::cout << bounce_angle << "  " << std::endl;
+// 			x_vel += (.01 * cos(bounce_angle)) * dt;
+// 			y_vel += (.01 * sin(bounce_angle)) * dt;
+// 		}	
+// 	}
+// 	if(ball.y >= opponent.paddle.y && ball.y <= opponent.paddle.y + opponent.paddle.h){
+// 		if(ball.x + ball.w == opponent.paddle.x){
+// 			float bounce_angle = calc(opponent,ball.y);
+// 			std::cout << "opponent paddle collision" << std::endl;
+// 			x_vel += -1 * (.01 * cos(bounce_angle)) * dt;
+// 			y_vel += (.01 * sin(bounce_angle)) * dt;
+// 		}	
+// 	}
 	// handle collisions to paddles
-	// axis	
+		// axis	
+}
+
+
+inline float calc_win(const float &ball_pos, const bool isDown){
+	const float rel_intersect = (SCREEN_WIDTH / 2) - ball_pos;
+	const float norm_intersect = rel_intersect / (SCREEN_WIDTH / 2);
+	const float bounce_angle = norm_intersect * 45;
+	return bounce_angle;
 }
 
 inline float calc(const paddle &p, int y_collide){
