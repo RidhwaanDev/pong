@@ -2,7 +2,7 @@
 #include <vector>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-
+#include "pong.h"
 // variables like width and height and titles
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -12,31 +12,6 @@ const std::string TITLE = "Pong";
 
 std::vector<SDL_Texture*> tex_tracker;
 
-// some objects 
-typedef struct pong{
-	SDL_Rect ball;
-	int x_velocity;
-	int y_velocity;	
-
-}pong;
-
-typedef struct e_paddle { // enemy paddle;
-	SDL_Rect paddle;
-	int x_velocity;
-	int y_velocity;	
-}e_paddle, p_paddle
-// clock for delta time
-struct game_clock{
-	u_int32_t last_time = 0;
-	float delta_time = 0;
-	
-	void tick(){
-		uint32_t tick_time = SDL_GetTicks();
-		delta_time = tick_time - last_time;
-		last_time = tick_time;
-	}
-}; 
-#define loop(i,i) for(int i = i; i < i; i++){ #ifdef std 
 	
 // methods 
 bool init(SDL_Window**, SDL_Renderer**);
@@ -44,6 +19,7 @@ void clean(SDL_Renderer** , SDL_Window** );
 void err(const char *func_name, const unsigned line_num);
 void handle_collide(pong ball, const e_paddle &player, const e_paddle &enemy);
 SDL_Texture* loadTexture(const std::string &path, SDL_Renderer* renderer);
+
 int main(int argc, char *args[]){
 	SDL_Window *gWindow;
 	SDL_Renderer *gRenderer;
@@ -57,9 +33,8 @@ int main(int argc, char *args[]){
 
 		SDL_Event e;
 
-
 		struct game_clock c;
-		pong p;
+		pong p(.1,0);
 		p.ball.x = ( SCREEN_WIDTH / 2 );
 		p.ball.y = y;
 		p.ball.h = 16;
@@ -72,7 +47,7 @@ int main(int argc, char *args[]){
 		player_paddle.paddle.y = y;
 	
 		e_paddle enemy_paddle;
-		enemy_paddle.paddle.x = 0;
+		enemy_paddle.paddle.x = SCREEN_WIDTH - 25;
 		enemy_paddle.paddle.w = 25;
 		enemy_paddle.paddle.h = 100;
 		enemy_paddle.paddle.y = y;
@@ -91,18 +66,22 @@ int main(int argc, char *args[]){
 				}
 
 			} 
-			p.ball.x += .1 *( c.delta_time);	
+
 			player_paddle.paddle.y = y;
+			enemy_paddle.paddle.y = p.ball.y;
 
-			handle_collide(&p, player_paddle, enemy_paddle);
+			p.update_movement(c.delta_time, p.x_vel, p.y_vel);
+			p.handle_collision(c.delta_time, player_paddle, enemy_paddle);
 
-			std::cout << "delta time" << " "  << c.delta_time / 1000 << std::endl;	
+
+			// std::cout << "delta time" << " "  << c.delta_time / 1000 << std::endl;	
 
 			SDL_SetRenderDrawColor(gRenderer , 0x00 , 0x00, 0x00, 0xFF);
 			SDL_RenderClear(gRenderer);	
 			SDL_SetRenderDrawColor(gRenderer , 0xFF , 0xFF, 0xFF, 0xFF);
 			SDL_RenderFillRect(gRenderer, &p.ball);
 			SDL_RenderFillRect(gRenderer, &player_paddle.paddle);
+			SDL_RenderFillRect(gRenderer, &enemy_paddle.paddle);
 			SDL_RenderPresent( gRenderer );
 			
 			SDL_Delay(1000 / 60);
@@ -162,17 +141,33 @@ SDL_Texture* loadTexture(const std::string &path, SDL_Renderer *renderer){
 	return result_texture;
 }
 
-void handle_collide(pong &ball, const e_paddle &player, const e_paddle &enemy){
-	
+void pong::handle_collision(float dt, const paddle &player, const paddle &opponent){
+	 std::cout << "handling collision" << std::endl;
+	// handle collision with with paddle
+	// y-axis collision
+	 std::cout << "ball.x " << ball.x << " ball.y " << ball.y << std::endl;
+	 std::cout << "paddle.x " << player.paddle.x << " ball.y " << ball.y << std::endl;
+	 if(ball.y >= player.paddle.y && ball.y <= player.paddle.y + player.paddle.h){
+		if(ball.x == player.paddle.x){
+			// collision has happened
+			std::cout << "ball collision" << std::endl;
+			x_vel *= -1;
+		}	
+	 }
+	 if(ball.y >= opponent.paddle.y && ball.y <= opponent.paddle.y + opponent.paddle.h){
+		 
+		if(ball.x == opponent.paddle.x){
+			// collision has happened
+			std::cout << "ball collision" << std::endl;
+			x_vel *= -1;
+		}	
+	 }
+
+
+	// handle collisions to paddles
 	// axis	
-	   
-
-
-
-
-
-
 }
+
 
 void clean(SDL_Renderer**  gRenderer , SDL_Window** gWindow ){
 	for(auto &a: tex_tracker){
