@@ -37,3 +37,5 @@ struct game_clock{
 		last_time = tick_time;
 	}
 }; 
+
+inline float calc(const paddle &p,  int y_collide);

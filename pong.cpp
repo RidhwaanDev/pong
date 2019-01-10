@@ -142,24 +142,29 @@ SDL_Texture* loadTexture(const std::string &path, SDL_Renderer *renderer){
 }
 
 void pong::handle_collision(float dt, const paddle &player, const paddle &opponent){
-	 std::cout << "handling collision" << std::endl;
-	// handle collision with with paddle
-	// y-axis collision
-	 std::cout << "ball.x " << ball.x << " ball.y " << ball.y << std::endl;
-	 std::cout << "paddle.x " << player.paddle.x << " ball.y " << ball.y << std::endl;
 	 if(ball.y >= player.paddle.y && ball.y <= player.paddle.y + player.paddle.h){
-		if(ball.x == player.paddle.x){
-			// collision has happened
-			std::cout << "ball collision" << std::endl;
-			x_vel *= -1;
+		if(ball.x  == player.paddle.x){
+			std::cout << "COLLIDE";
+			const auto bounce_angle = calc(player, ball.y);
+			std::cout << bounce_angle << "  " << std::endl;
+			x_vel += (.01 * cos(bounce_angle)) * dt;
+			y_vel += (.01 * sin(bounce_angle)) * dt;
+
 		}	
 	 }
 	 if(ball.y >= opponent.paddle.y && ball.y <= opponent.paddle.y + opponent.paddle.h){
-		 
-		if(ball.x == opponent.paddle.x){
-			// collision has happened
-			std::cout << "ball collision" << std::endl;
-			x_vel *= -1;
+		if(ball.x + ball.w == opponent.paddle.x){
+			/*
+			 * First calculate how far the ball is from the center ( rel_intersect )
+			 * then normalize that value ( make it between -1 and 1 ) so that we can scale our angle between -1 and 1. If it was not normalized than our bounce_angle when
+			 * multiplied by 75 becomes really large  for example ( norm_intersect is 5  * 75 ) 
+			 */ 
+			float bounce_angle = calc(opponent,ball.y);
+			std::cout << bounce_angle << "  " << std::endl;
+
+			x_vel += -1 * (.01 * cos(bounce_angle)) * dt;
+			y_vel += (.01 * sin(bounce_angle)) * dt;
+			
 		}	
 	 }
 
@@ -167,6 +172,16 @@ void pong::handle_collision(float dt, const paddle &player, const paddle &oppone
 	// handle collisions to paddles
 	// axis	
 }
+
+inline float calc(const paddle &p, int y_collide){
+
+	const float rel_intersect= (p.paddle.y+ (p.paddle.w/2)) - y_collide;
+	const float norm_intersect= rel_intersect/ (p.paddle.w / 2);
+	// bounce angle is basically the input to the tangent function ( slope ) 
+	const float bounce_angle = norm_intersect * 75;
+	return bounce_angle;
+}
+
 
 
 void clean(SDL_Renderer**  gRenderer , SDL_Window** gWindow ){
