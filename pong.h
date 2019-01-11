@@ -36,3 +36,6 @@ struct game_clock{
 	}
 }; 
 
+float angle(const float &py, const float &bally, const int &h);
+
+

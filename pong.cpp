@@ -72,13 +72,27 @@ int main(int argc, char *args[]){
 			if(player1.paddle.y + player1.paddle.h > SCREEN_HEIGHT){
 				player1.paddle.y = SCREEN_HEIGHT - player1.paddle.h;
 			}
-
+			if(p.ball.y < 0){
+				p.ball.y = 0;
+				p.vy *= -1;
+			}
+			if(p.ball.y > SCREEN_HEIGHT){
+				p.ball.y = SCREEN_HEIGHT - p.ball.h - 1;
+				p.vy *= -1;
+			}
 			player1.paddle.y = y;
+			
 
-			p.ball.x +=  p.vx * c.delta_time;
 			p.handle_collision(c.delta_time, player1, player2);
+			p.ball.x +=  p.vx * c.delta_time;
+			p.ball.y +=  p.vy * c.delta_time;
+
+			std::cout << "           " << p.ball.x << std::endl;
+			std::cout << "   " << p.ball.y << std::endl;
+			
 
 			// std::cout << "delta time" << " "  << c.delta_time / 1000 << std::endl;	
+
 
 			SDL_SetRenderDrawColor(gRenderer , 0x00 , 0x00, 0x00, 0xFF);
 			SDL_RenderClear(gRenderer);	
@@ -99,12 +113,23 @@ int main(int argc, char *args[]){
 void pong::handle_collision(float dt, const paddle &player, const paddle &opponent){
 	if(SDL_HasIntersection(&ball,&player.paddle)){
 		std::cout << "player collide" << std::endl;
+		float bounce_angle = angle(player.paddle.y, ball.y, player.paddle.h);
+		vx =  -1 * .1 *  cos(bounce_angle);
+		vy = ((vy > 0) ? -1 : 1) * 0.1 * sin(bounce_angle);
 	}
 
 	if(SDL_HasIntersection(&ball,&opponent.paddle)){
 		std::cout << "opponent collide" << std::endl;
 	}
 	
+}
+
+float angle(const float &py, const float &bally, const int &h){
+	float relative_y = ((py + h) / 2) - bally;
+	relative_y = relative_y / 2.0;
+	std::cout << "relative_y " << relative_y << std::endl;
+	return relative_y * 75;
+
 }
 
 
