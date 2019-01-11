@@ -1,6 +1,0 @@
-Need object for player_paddle
-		enemy_paddle
-
-Need object for ball
-Want music
-Want some text to play
