@@ -34,7 +34,7 @@ int main(int argc, char *args[]){
 
 		struct game_clock c;
 
-		pong p(-.1,0,SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+		pong p(-.2,0,SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 		p.ball.x = ( SCREEN_WIDTH / 2 );
 		p.ball.y = ( SCREEN_HEIGHT / 2 );
 		p.ball.h = 16;
@@ -72,23 +72,38 @@ int main(int argc, char *args[]){
 			if(player1.paddle.y + player1.paddle.h > SCREEN_HEIGHT){
 				player1.paddle.y = SCREEN_HEIGHT - player1.paddle.h;
 			}
+
+			if(player2.paddle.y < 0){
+				player2.paddle.y = 0;
+			}
+			if(player2.paddle.y + player2.paddle.h > SCREEN_HEIGHT){
+				player2.paddle.y = SCREEN_HEIGHT - player2.paddle.h;
+			}
+
 			if(p.ball.y < 0){
-				p.ball.y = 0;
 				p.vy *= -1;
 			}
-			if(p.ball.y > SCREEN_HEIGHT){
+			if(p.ball.y + p.ball.h > SCREEN_HEIGHT){
 				p.ball.y = SCREEN_HEIGHT - p.ball.h - 1;
 				p.vy *= -1;
 			}
+
+			// paddle movement
 			player1.paddle.y = y;
-			
+			if(p.ball.y > player2.paddle.y){
+				player2.paddle.y -= .1 * c.delta_time;
+			} else if(p.ball.y < player2.paddle.y){
+				player2.paddle.y += .1 * c.delta_time;
+			}
+
+						
 
 			p.handle_collision(c.delta_time, player1, player2);
 			p.ball.x +=  p.vx * c.delta_time;
 			p.ball.y +=  p.vy * c.delta_time;
 
-			std::cout << "           " << p.ball.x << std::endl;
-			std::cout << "   " << p.ball.y << std::endl;
+			std::cout << "x: " << p.ball.x << std::endl;
+			std::cout << "y: " << p.ball.y << std::endl;
 			
 
 			// std::cout << "delta time" << " "  << c.delta_time / 1000 << std::endl;	
@@ -114,8 +129,8 @@ void pong::handle_collision(float dt, const paddle &player, const paddle &oppone
 	if(SDL_HasIntersection(&ball,&player.paddle)){
 		std::cout << "player collide" << std::endl;
 		float bounce_angle = angle(player.paddle.y, ball.y, player.paddle.h);
-		vx =  -1 * .1 *  cos(bounce_angle);
-		vy = ((vy > 0) ? -1 : 1) * 0.1 * sin(bounce_angle);
+		vx =  .2 *  cos(bounce_angle);
+		vy = ((vy > 0) ? -1 : 1) * 0.2 * sin(bounce_angle);
 	}
 
 	if(SDL_HasIntersection(&ball,&opponent.paddle)){
