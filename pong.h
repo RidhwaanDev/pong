@@ -1,27 +1,20 @@
 #pragma once
 
-
-typedef struct paddle{ // enemy paddle;
+struct paddle{ // enemy paddle;
 	SDL_Rect paddle;
-}e_paddle, p_paddle;
+	int score;
+};
 
-typedef struct pong{
-	pong() = default;
-	pong(const SDL_Color &color){}
-	pong(float x, float y):
-		x_vel(x), y_vel(y){}
+struct pong{
+	pong(float v_x, float v_y, float x_pos, float y_pos):
+		vx(v_x), vy(v_y), x(x_pos), y(y_pos){}	
 
 	SDL_Rect ball;
+	float vx;
+	float vy;
+	float x;
+	float y;
 
-	float x_vel;
-	float y_vel;
-	void update_movement(float dt, float x, float y){
-		x_vel = x;
-		y_vel = y;
-
-		ball.x += x_vel * dt;
-		ball.y += y_vel * dt;
-	}
 	/*
 	 * First calculate how far the ball is from the center ( rel_intersect )
 	 * then normalize that value ( make it between -1 and 1 ) so that we can scale our angle between -1 and 1. If it was not normalized than our bounce_angle when
@@ -29,7 +22,7 @@ typedef struct pong{
 	 */ 
 	void handle_collision(float dt, const paddle &player, const paddle &opponent);	
 
-}pong;
+};
 using u32 = u_int32_t;
 // clock for delta time
 struct game_clock{
@@ -43,5 +36,3 @@ struct game_clock{
 	}
 }; 
 
-inline float calc(const paddle &p,  int y_collide);
-inline float calc_win(const float &ball_pos, const bool isDown);
