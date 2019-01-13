@@ -110,6 +110,7 @@ int main(int argc, char *args[]){
 			SDL_RenderFillRect(gRenderer, &player1.paddle);
 			SDL_RenderFillRect(gRenderer, &player2.paddle);
 			SDL_SetRenderDrawColor(gRenderer, 0xAA, 0xAA, 0xAA, 0xFF);
+			SDL_RenderDrawLine(gRenderer, SCREEN_WIDTH/2, 0, SCREEN_WIDTH/2, SCREEN_HEIGHT);
 			SDL_RenderPresent( gRenderer );
 			SDL_Delay(1000 / 60);
 		}
