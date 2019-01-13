@@ -4,8 +4,8 @@
 #include <SDL2/SDL_image.h>
 #include "pong.h"
 // variables like width and height and titles
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+const int SCREEN_WIDTH = 740;
+const int SCREEN_HEIGHT = 580;
 const std::string TITLE = "Pong";
 
 // keep track of all texture and free at end
@@ -34,7 +34,7 @@ int main(int argc, char *args[]){
 
 		struct game_clock c;
 
-		pong p(-.2,0,SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+		pong p(-.3f,0,SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 		p.ball.x = ( SCREEN_WIDTH / 2 );
 		p.ball.y = ( SCREEN_HEIGHT / 2 );
 		p.ball.h = 16;
@@ -69,8 +69,8 @@ int main(int argc, char *args[]){
 			if(player1.paddle.y < 0){
 				player1.paddle.y = 0;
 			}
-			if(player1.paddle.y + player1.paddle.h > SCREEN_HEIGHT){
-				player1.paddle.y = SCREEN_HEIGHT - player1.paddle.h;
+			if(player1.paddle.y + player1.paddle.h >= SCREEN_HEIGHT){
+				player1.paddle.y = SCREEN_HEIGHT -  player1.paddle.h;
 			}
 
 			if(player2.paddle.y < 0){
@@ -87,23 +87,25 @@ int main(int argc, char *args[]){
 				p.ball.y = SCREEN_HEIGHT - p.ball.h - 1;
 				p.vy *= -1;
 			}
-
+   
 			// paddle movement
-			player1.paddle.y = y;
-			if(p.ball.y > player2.paddle.y){
-				player2.paddle.y -= .1 * c.delta_time;
-			} else if(p.ball.y < player2.paddle.y){
-				player2.paddle.y += .1 * c.delta_time;
-			}
+			 if(y < SCREEN_HEIGHT - player1.paddle.h){
+				 player1.paddle.y = y;
+			 }
+			 if(p.ball.y > player2.paddle.y){
+			 	player2.paddle.y -= .1 * c.delta_time;
+			 } else if(p.ball.y < player2.paddle.y){
+			 	player2.paddle.y += .1 * c.delta_time;
+			 }
 
-						
+
+			p.ball.x += p.vx * c.delta_time;
+			p.ball.y += p.vy * c.delta_time;
 
 			p.handle_collision(c.delta_time, player1, player2);
-			p.ball.x +=  p.vx * c.delta_time;
-			p.ball.y +=  p.vy * c.delta_time;
 
-			std::cout << "x: " << p.ball.x << std::endl;
-			std::cout << "y: " << p.ball.y << std::endl;
+// 			std::cout << "x: " << p.ball.x << std::endl;
+// 			std::cout << "y: " << p.ball.y << std::endl;
 			
 
 			// std::cout << "delta time" << " "  << c.delta_time / 1000 << std::endl;	
@@ -115,6 +117,7 @@ int main(int argc, char *args[]){
 			SDL_RenderFillRect(gRenderer, &p.ball);
 			SDL_RenderFillRect(gRenderer, &player1.paddle);
 			SDL_RenderFillRect(gRenderer, &player2.paddle);
+			SDL_SetRenderDrawColor(gRenderer, 0xAA, 0xAA, 0xAA, 0xFF);
 			SDL_RenderPresent( gRenderer );
 
 			SDL_Delay(1000 / 60);
@@ -127,23 +130,24 @@ int main(int argc, char *args[]){
 
 void pong::handle_collision(float dt, const paddle &player, const paddle &opponent){
 	if(SDL_HasIntersection(&ball,&player.paddle)){
-		std::cout << "player collide" << std::endl;
 		float bounce_angle = angle(player.paddle.y, ball.y, player.paddle.h);
-		vx =  .2 *  cos(bounce_angle);
-		vy = ((vy > 0) ? -1 : 1) * 0.2 * sin(bounce_angle);
+		vx =  .2f *  cos(bounce_angle);
+		vy = ((vy > 0) ? -1 : 1) * 0.2f * sin(bounce_angle);
 	}
 
 	if(SDL_HasIntersection(&ball,&opponent.paddle)){
-		std::cout << "opponent collide" << std::endl;
+		float bounce_angle = angle(opponent.paddle.y, ball.y, opponent.paddle.h);
+		vx =  -1 * .2 * cos(bounce_angle);
+		vy = ((vy > 0) ? -1 : 1) * 0.2 * sin(bounce_angle);
 	}
 	
 }
 
 float angle(const float &py, const float &bally, const int &h){
 	float relative_y = ((py + h) / 2) - bally;
-	relative_y = relative_y / 2.0;
-	std::cout << "relative_y " << relative_y << std::endl;
-	return relative_y * 75;
+	relative_y = relative_y / ((py + h) / 2);
+	relative_y *= 1.2f;
+	return relative_y;
 
 }
 
