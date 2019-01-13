@@ -69,9 +69,6 @@ int main(int argc, char *args[]){
 			if(player1.paddle.y < 0){
 				player1.paddle.y = 0;
 			}
-			if(player1.paddle.y + player1.paddle.h >= SCREEN_HEIGHT){
-				player1.paddle.y = SCREEN_HEIGHT -  player1.paddle.h;
-			}
 
 			if(player2.paddle.y < 0){
 				player2.paddle.y = 0;
@@ -89,27 +86,22 @@ int main(int argc, char *args[]){
 			}
    
 			// paddle movement
-			 if(y < SCREEN_HEIGHT - player1.paddle.h){
-				 player1.paddle.y = y;
-			 }
-			 if(p.ball.y > player2.paddle.y){
-			 	player2.paddle.y -= .1 * c.delta_time;
-			 } else if(p.ball.y < player2.paddle.y){
-			 	player2.paddle.y += .1 * c.delta_time;
-			 }
+			if(y < SCREEN_HEIGHT - player1.paddle.h){
+				player1.paddle.y = y;
+			}else if(y >  SCREEN_HEIGHT - player1.paddle.h){
+				player1.paddle.y = SCREEN_HEIGHT - player1.paddle.h;
+			}
 
+			if(p.ball.y > (player2.paddle.y + (player2.paddle.h / 2))){
+				player2.paddle.y -= .1 * c.delta_time;
+			} else if(p.ball.y < (player2.paddle.y + (player2.paddle.h / 2))){
+				player2.paddle.y += .1 * c.delta_time;
+			}
 
 			p.ball.x += p.vx * c.delta_time;
 			p.ball.y += p.vy * c.delta_time;
 
 			p.handle_collision(c.delta_time, player1, player2);
-
-// 			std::cout << "x: " << p.ball.x << std::endl;
-// 			std::cout << "y: " << p.ball.y << std::endl;
-			
-
-			// std::cout << "delta time" << " "  << c.delta_time / 1000 << std::endl;	
-
 
 			SDL_SetRenderDrawColor(gRenderer , 0x00 , 0x00, 0x00, 0xFF);
 			SDL_RenderClear(gRenderer);	
@@ -119,7 +111,6 @@ int main(int argc, char *args[]){
 			SDL_RenderFillRect(gRenderer, &player2.paddle);
 			SDL_SetRenderDrawColor(gRenderer, 0xAA, 0xAA, 0xAA, 0xFF);
 			SDL_RenderPresent( gRenderer );
-
 			SDL_Delay(1000 / 60);
 		}
 
