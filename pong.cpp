@@ -70,12 +70,12 @@ int main(int argc, char *args[]){
 				player1.paddle.y = 0;
 			}
 
-			if(player2.paddle.y < 0){
-				player2.paddle.y = 0;
-			}
-			if(player2.paddle.y + player2.paddle.h > SCREEN_HEIGHT){
-				player2.paddle.y = SCREEN_HEIGHT - player2.paddle.h;
-			}
+			 if(player2.paddle.y < 0){
+			 	player2.paddle.y = 0;
+			 }
+			 if(player2.paddle.y + player2.paddle.h > SCREEN_HEIGHT){
+			 	player2.paddle.y = SCREEN_HEIGHT - player2.paddle.h;
+			 }
 
 			if(p.ball.y < 0){
 				p.vy *= -1;
@@ -84,7 +84,13 @@ int main(int argc, char *args[]){
 				p.ball.y = SCREEN_HEIGHT - p.ball.h - 1;
 				p.vy *= -1;
 			}
-   
+			// score counter
+			if(p.ball.x < 0){
+				p.ball.x = SCREEN_WIDTH / 2;
+			}
+			if(p.ball.x + p.ball.w > SCREEN_WIDTH ){
+				p.ball.x = SCREEN_WIDTH / 2;
+			}
 			// paddle movement
 			if(y < SCREEN_HEIGHT - player1.paddle.h){
 				player1.paddle.y = y;
@@ -92,16 +98,14 @@ int main(int argc, char *args[]){
 				player1.paddle.y = SCREEN_HEIGHT - player1.paddle.h;
 			}
 
-			if(p.ball.y > (player2.paddle.y + (player2.paddle.h / 2))){
-				player2.paddle.y -= .1 * c.delta_time;
-			} else if(p.ball.y < (player2.paddle.y + (player2.paddle.h / 2))){
-				player2.paddle.y += .1 * c.delta_time;
-			}
 
 			p.ball.x += p.vx * c.delta_time;
 			p.ball.y += p.vy * c.delta_time;
+			player2.paddle.y += player2.vy * c.delta_time;
 
-			p.handle_collision(c.delta_time, player1, player2);
+			paddle_update(player2, p);
+			p.handle_collision(player1, player2);
+
 
 			SDL_SetRenderDrawColor(gRenderer , 0x00 , 0x00, 0x00, 0xFF);
 			SDL_RenderClear(gRenderer);	
@@ -119,8 +123,7 @@ int main(int argc, char *args[]){
 		return 0;
 	}
 }
-
-void pong::handle_collision(float dt, const paddle &player, const paddle &opponent){
+void pong::handle_collision(const paddle &player, const paddle &opponent){
 	if(SDL_HasIntersection(&ball,&player.paddle)){
 		float bounce_angle = angle(player.paddle.y, ball.y, player.paddle.h);
 		vx =  .2f *  cos(bounce_angle);
@@ -134,15 +137,25 @@ void pong::handle_collision(float dt, const paddle &player, const paddle &oppone
 	}
 	
 }
+void paddle_update( paddle &opponent, const pong &p){
+	 int paddle_midpoint = (opponent.paddle.y + opponent.paddle.h ) / 2;
+	 int ball_midpoint = (p.ball.y + p.ball.h) / 2;	
+	 std::cout << "paddle m " << paddle_midpoint << " ball m " << ball_midpoint << std::endl;
+	 if( paddle_midpoint  < ball_midpoint + 2){
+	      opponent.vy = .1;
+	      // std::cout << "MOVING UP" << std::endl;
+	 } else if(paddle_midpoint  > ball_midpoint - 2){
+	     // std::cout << "MOVING DOWN" << std::endl;
+	       opponent.vy = -.1;
+	 }
+}
 
 float angle(const float &py, const float &bally, const int &h){
 	float relative_y = ((py + h) / 2) - bally;
 	relative_y = relative_y / ((py + h) / 2);
 	relative_y *= 1.2f;
 	return relative_y;
-
 }
-
 
 
 bool init(SDL_Window **gWindow, SDL_Renderer **gRenderer){
