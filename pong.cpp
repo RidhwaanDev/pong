@@ -17,6 +17,7 @@ bool init(SDL_Window**, SDL_Renderer**);
 void clean(SDL_Renderer** , SDL_Window** );
 void err(const char *func_name, const unsigned line_num);
 
+
 SDL_Texture* loadTexture(const std::string &path, SDL_Renderer* renderer);
 
 int main(int argc, char *args[]){
@@ -128,6 +129,7 @@ void pong::handle_collision(const paddle &player, const paddle &opponent){
 		float bounce_angle = angle(player.paddle.y, ball.y, player.paddle.h);
 		vx =  .2f *  cos(bounce_angle);
 		vy = ((vy > 0) ? -1 : 1) * 0.2f * sin(bounce_angle);
+		
 	}
 
 	if(SDL_HasIntersection(&ball,&opponent.paddle)){
@@ -135,8 +137,8 @@ void pong::handle_collision(const paddle &player, const paddle &opponent){
 		vx =  -1 * .2 * cos(bounce_angle);
 		vy = ((vy > 0) ? -1 : 1) * 0.2 * sin(bounce_angle);
 	}
-	
 }
+
 void paddle_update( paddle &opponent, const pong &p){
 	 int paddle_midpoint = (opponent.paddle.y + opponent.paddle.h ) / 2;
 	 int ball_midpoint = (p.ball.y + p.ball.h) / 2;	
