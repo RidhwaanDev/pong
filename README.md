@@ -7,4 +7,4 @@ Classic pong with SDL2
 - brew install sdl2-image
 - cd pong
 - make game
-- play
+- ./play
