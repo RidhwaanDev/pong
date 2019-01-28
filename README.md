@@ -1,6 +1,6 @@
 # pong
 Classic pong with SDL2
-![ScreenShot](https://imgur.com/a/SjsLSwW)
+![ScreenShot](https://i.imgur.com/Dx6Dw4U.png)
 
 ### How to download on macOS
 - brew install sdl2
