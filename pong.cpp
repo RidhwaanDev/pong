@@ -26,39 +26,42 @@ int main(int argc, char *args[]){
 	std::cout << __func__ ;
 	if(!init(&gWindow,&gRenderer)){
 		err(__func__,__LINE__);
-		// handle initliazie error	
-	} else {
-		int x,y = 0;
-		bool quit = false;
+		// handle initliazie error
+		return -1;
+		
+	} 
+		
+	int x,y = 0;
+	bool quit = false;
 
-		SDL_Event e;
+	SDL_Event e;
 
-		struct game_clock c;
+	struct game_clock c;
 
-		pong p(-.3f,0,SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
-		p.ball.x = ( SCREEN_WIDTH / 2 );
-		p.ball.y = ( SCREEN_HEIGHT / 2 );
-		p.ball.h = 16;
-		p.ball.w = 16;
+	pong p(-.3f,0,SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+	p.ball.x = ( SCREEN_WIDTH / 2 );
+	p.ball.y = ( SCREEN_HEIGHT / 2 );
+	p.ball.h = 16;
+	p.ball.w = 16;
 
-		paddle player1;
-		player1.paddle.x = 0;
-		player1.paddle.w = 25;
-		player1.paddle.h = 100;
-		player1.paddle.y = y;
+	paddle player1;
+	player1.paddle.x = 0;
+	player1.paddle.w = 25;
+	player1.paddle.h = 100;
+	player1.paddle.y = y;
 
-		paddle player2;
-		player2.paddle.x = SCREEN_WIDTH - 25;
-		player2.paddle.w = 25;
-		player2.paddle.h = 100;
-		player2.paddle.y = SCREEN_HEIGHT / 2;
+	paddle player2;
+	player2.paddle.x = SCREEN_WIDTH - 25;
+	player2.paddle.w = 25;
+	player2.paddle.h = 100;
+	player2.paddle.y = SCREEN_HEIGHT / 2;
 
-		while(!quit){
-			c.tick();	
+	while(!quit){
+		c.tick();	
 
-			while(SDL_PollEvent(&e) != 0){
-				if(e.type == SDL_QUIT){
-					quit = true;
+		while(SDL_PollEvent(&e) != 0){
+			if(e.type == SDL_QUIT){
+				quit = true;
 				}
 				if(e.type ==  SDL_MOUSEMOTION){
 					x = e.motion.x;
@@ -66,7 +69,7 @@ int main(int argc, char *args[]){
 				}
 
 			} 
-			// handle bounds
+			// hande bounds
 			if(player1.paddle.y < 0){
 				player1.paddle.y = 0;
 			}
@@ -122,7 +125,7 @@ int main(int argc, char *args[]){
 
 		clean(&gRenderer, &gWindow);
 		return 0;
-	}
+	
 }
 void pong::handle_collision(const paddle &player, const paddle &opponent){
 	if(SDL_HasIntersection(&ball,&player.paddle)){
